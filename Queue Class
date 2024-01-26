@@ -1,0 +1,54 @@
+
+/*-------------------------------------------------------------------------------------------------------------------
+The Queue class to store the values/moves of each computer that will play in function playCvC()
+-------------------------------------------------------------------------------------------------------------------*/
+class Queue {
+private:
+    int data[10]; // Array to store items (1-9 possibilities)
+    int front, rear; // Indexes for front and rear
+
+public:
+    Queue() : front(0), rear(-1) {}
+
+    //standard enqueue function
+    void enqueue(int item) {
+        if (rear < 99) { // Check for queue overflow
+            data[++rear] = item;
+        }
+    }
+
+    //standard dequeue function
+    int dequeue() {
+        if (front <= rear) {
+            return data[front++];
+        }
+        return -1;
+    }
+
+    //standard function to check if queue is empty
+    bool isEmpty() const {
+        return front > rear;
+    }
+
+    //resets queue
+    void clear() {
+        front = 0;
+        rear = -1;
+    }
+
+    /**************************************************************************************
+    Fills the queue with random values (1-9), no duplicates
+
+    Called in: constructor, playCvC()
+    Calls: random_shuffle(), enqueue()
+    **************************************************************************************/
+    void fillRandom() {
+        clear();
+        int positions[9] = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        random_shuffle(positions, positions + 9); // Randomize positions
+        for (int i = 0; i < 9; ++i) {
+            enqueue(positions[i]);
+        }
+    }
+};
+
