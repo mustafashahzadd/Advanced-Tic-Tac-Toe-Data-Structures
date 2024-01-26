@@ -1,0 +1,118 @@
+
+
+/*-----------------------------------------------------------------------------------------------------------
+The Node class for linked list
+-----------------------------------------------------------------------------------------------------------*/
+class LLNode {
+public:
+    int board[9]; //Per move, storing that instance's board
+    string mover; //Who moved?
+    int move; //Where was the move placed?
+    LLNode* next; //Next board
+    LLNode* prev; //Prev board
+    string winner; //Who won?
+
+    LLNode() {
+        mover = "No-one";
+        move = NULL;
+    }
+};
+
+
+/*-----------------------------------------------------------------------------------------------------------
+The Class for linked list (that will be inside each 2D linked list node)
+-----------------------------------------------------------------------------------------------------------*/
+class LL {
+public:
+    LLNode* head;
+
+    LL() {
+        head = nullptr;
+    }
+
+
+
+    /**************************************************************************************
+    Add a move to the Linked List, for the ongoing session's i-th game
+
+    Called in: playPvC()
+    Calls:
+    Return:
+    **************************************************************************************/
+    void addMove(int b[9], string mov, int movee) {
+        if (head == nullptr) {
+            head = new LLNode();
+
+            for (int i = 0; i < 9; i++)
+                head->board[i] = b[i];
+
+            head->mover = mov;
+            head->move = movee;
+
+            return;
+        }
+
+        LLNode* ptr = head;
+
+        if (ptr->next == nullptr) {
+            ptr->next = new LLNode();
+
+            for (int i = 0; i < 9; i++)
+                ptr->next->board[i] = b[i];
+
+            ptr->next->mover = mov;
+            ptr->next->move = movee;
+            ptr->next->prev = ptr;
+
+            return;
+        }
+
+        while (ptr->next != nullptr) {
+            ptr = ptr->next;
+        }
+
+        ptr->next = new LLNode();
+
+        for (int i = 0; i < 9; i++)
+            ptr->next->board[i] = b[i];
+
+        ptr->next->mover = mov;
+        ptr->next->move = movee;
+        ptr->next->prev = ptr;
+
+        return;
+    }
+
+
+
+    /********************************************************************************************************
+    Display's a linked list completely. Meaning one session was played and all of it's moves were printed
+
+    Called in: displayGameMoves()
+    Calls:
+    Return:
+    ********************************************************************************************************/
+    void displayAllMoves() {
+        LLNode* temp = head;
+
+        while (temp != nullptr) {
+            for (int i = 0; i < 9; i++) {
+                char mark = (temp->board[i] == PLAYER) ? 'X' : (temp->board[i] == OPPONENT ? 'O' : '1' + i);
+                cout << mark;
+                if ((i + 1) % 3 == 0) cout << "\n";
+                if (i % 3 != 2) cout << "|";
+            }
+
+            if (temp->mover == "Player") {
+                temp->move++;
+            }
+
+            cout << "(Mover: " << temp->mover << " || Placed On: " << temp->move << ")" << endl << endl;
+
+            temp = temp->next;
+        }
+
+        cout << "All moves done!\n";
+    }
+};
+
