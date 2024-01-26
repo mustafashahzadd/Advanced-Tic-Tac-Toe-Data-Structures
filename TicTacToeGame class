@@ -1,0 +1,473 @@
+class TicTacToeGame {
+private:
+    LL2D gamemoves; // Will contain all the moves that will be played in a session
+
+    string currentGameMode; // PvP? PvC? CvC?
+
+    ResultStack gameResults; // Stack for move result
+
+    int board[9]; // Game board
+
+    int winningConditions[9][9]; // Winning conditions for the game
+
+    MoveStack moves; // Stack for player moves
+
+    Queue computer1Moves; // Queue for the first computer player
+
+    Queue computer2Moves; // Queue for the second computer player
+
+
+
+    /**************************************************************************************
+    Constructor. Initilizes the winnable conditions (row, column, or diagonal) has same elements or not.
+
+    Called in: playPvP(), playCvC()
+    Calls: QueueObject.fillRandom()
+    Return:
+    **************************************************************************************/
+    void initializeWinningConditions() {
+        // Rows
+        winningConditions[0][0] = 0; winningConditions[0][1] = 1; winningConditions[0][2] = 2;
+        winningConditions[1][0] = 3; winningConditions[1][1] = 4; winningConditions[1][2] = 5;
+        winningConditions[2][0] = 6; winningConditions[2][1] = 7; winningConditions[2][2] = 8;
+        // Columns
+        winningConditions[3][0] = 0; winningConditions[3][1] = 3; winningConditions[3][2] = 6;
+        winningConditions[4][0] = 1; winningConditions[4][1] = 4; winningConditions[4][2] = 7;
+        winningConditions[5][0] = 2; winningConditions[5][1] = 5; winningConditions[5][2] = 8;
+        // Diagonals
+        winningConditions[6][0] = 0; winningConditions[6][1] = 4; winningConditions[6][2] = 8;
+        winningConditions[7][0] = 2; winningConditions[7][1] = 4; winningConditions[7][2] = 6;
+    }
+
+
+
+    /**************************************************************************************
+    Reset's the board, to 'empty' state. No inputs.
+
+    Called in: playPvP(), playCvC()
+    Calls: QueueObject.fillRandom()
+    Return:
+    **************************************************************************************/
+    void resetBoard() {
+        for (int i = 0; i < 9; i++) {
+            board[i] = EMPTY;
+        }
+        computer1Moves.fillRandom();
+        computer2Moves.fillRandom();
+    }
+
+
+
+    /**************************************************************************************
+    Check's if game has finished, if either there are no moves left or someone won
+
+    Called in: playPvP(), playCvC()
+    Calls: checkWinner(), isMovesLeft()
+    Returns: bool
+    **************************************************************************************/
+    bool gameOver() {
+        return checkWinner() != EMPTY || !isMovesLeft();
+    }
+
+
+
+    /**************************************************************************************
+    Check's if any cell is empty, hence moves left
+
+    Called in: gameOver(), playCvC()
+    Calls:
+    Returns: bool
+    **************************************************************************************/
+    bool isMovesLeft() {
+        for (int i = 0; i < 9; i++) {
+            if (board[i] == EMPTY) return true;
+        }
+        return false;
+    }
+
+
+
+    /*************************************************************************************************
+    Check's who won by comparing winning conditions
+
+    Called in: gameOver(), playPvP(), playCvC()
+    Calls:
+    Returns: Winner (if 1 or -1 then either player 1, if 0 then game no finished or game tied)
+    *************************************************************************************************/
+    int checkWinner() {
+        for (int i = 0; i < 8; i++) {
+            if (board[winningConditions[i][0]] != EMPTY &&
+                board[winningConditions[i][0]] == board[winningConditions[i][1]] &&
+                board[winningConditions[i][1]] == board[winningConditions[i][2]]) {
+                return board[winningConditions[i][0]];
+            }
+        }
+        return EMPTY; // ret 0
+    }
+
+
+
+    /**************************************************************************************
+    Display's the tic tac toe board
+
+    Called in: playPvP(), playCvC()
+    Calls:
+    returns:
+    **************************************************************************************/
+    void drawBoard() {
+        for (int i = 0; i < 9; i++) {
+            char mark = (board[i] == PLAYER) ? 'X' : (board[i] == OPPONENT ? 'O' : '1' + i);
+            cout << mark;
+            if ((i + 1) % 3 == 0) cout << "\n";
+            if (i % 3 != 2) cout << "|";
+        }
+        cout << "\n";
+    }
+
+
+
+    /**************************************************************************************
+    Asks user for input and (if that block is empty/valid) the move is played
+
+    Called in: playPvP()
+    Calls:
+    Returns: Move (The position where player play's the move)
+    **************************************************************************************/
+    int playerMove(int currentPlayer) {
+        int move;
+        string playerLabel = (currentPlayer == PLAYER) ? "Player 1" : "Player 2";
+        cout << playerLabel << ", enter your move (1-9): ";
+        while (true) {
+            cin >> move;
+            move--; // Adjust for 0-indexed board
+            if (move >= 0 && move < 9 && board[move] == EMPTY) {
+                board[move] = currentPlayer;
+                break;
+            }
+            else {
+                cout << "Invalid move. Try again: ";
+            }
+        }
+
+        return move;
+    }
+
+
+
+    /**************************************************************************************
+    Displays who won
+
+    Called in: playPvP(), playCvC()
+    Calls:
+    Returns:
+    **************************************************************************************/
+    void announceResult() {
+        string winner;
+        int result = checkWinner();
+
+        if (currentGameMode == "Player vs Player") {
+            if (result == PLAYER) {
+                winner = "Player 1";
+            }
+            else if (result == OPPONENT) {
+                winner = "Player 2";
+            }
+            else {
+                winner = "Draw";
+            }
+        }
+        else {
+            if (result == PLAYER) {
+                winner = "Player";
+            }
+            else if (result == OPPONENT) {
+                winner = "Computer";
+            }
+            else {
+                winner = "Draw";
+            }
+        }
+
+        cout << winner << " wins!" << endl;
+
+        gameResults.push(currentGameMode, winner);
+
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+    }
+
+
+
+    /***********************************************************************************************************************
+    Gives the state of the board a value (if user won, -10; if computer won, 10; else game is not complete or tie, 0)
+
+    Called in: minimax()
+    Calls:
+    Returns: score (checking current board's state and giving it a value)
+    ***********************************************************************************************************************/
+    int evaluateBoard() {
+        for (int i = 0; i < 8; i++) {
+            if (board[winningConditions[i][0]] == board[winningConditions[i][1]] &&
+                board[winningConditions[i][1]] == board[winningConditions[i][2]]) {
+                if (board[winningConditions[i][0]] == OPPONENT) return 10;
+                else if (board[winningConditions[i][0]] == PLAYER) return -10;
+            }
+        }
+        return 0;
+    }
+
+
+
+    /**************************************************************************************
+    Recursively works to find the 'best' score that would be advantagious to computer
+
+    Called in: findBestMove()
+    Calls: evaluateBoard(), minimax(), max(), min()
+    Returns: bestScore (after reaching a state where someone won or game tied)
+    **************************************************************************************/
+    int minimax(int depth, bool isMaximizingPlayer) {
+        int score = evaluateBoard();
+
+        if (score == 10) return score - depth;
+        if (score == -10) return score + depth;
+        if (!isMovesLeft()) return 0;
+
+        if (isMaximizingPlayer) {
+            int bestScore = -INT_MAX;
+            for (int i = 0; i < 9; ++i) {  // Use 9 instead of board.size()
+                if (board[i] == EMPTY) {
+                    board[i] = OPPONENT;
+                    bestScore = max(bestScore, minimax(depth + 1, false));
+                    board[i] = EMPTY;
+                }
+            }
+            return bestScore;
+        }
+        else {
+            int bestScore = INT_MAX;
+            for (int i = 0; i < 9; ++i) {  // Use 9 instead of board.size()
+                if (board[i] == EMPTY) {
+                    board[i] = PLAYER;
+                    bestScore = min(bestScore, minimax(depth + 1, true));
+                    board[i] = EMPTY;
+                }
+            }
+            return bestScore;
+        }
+    }
+
+
+
+    /**************************************************************************************
+    Finds the best move and returns it
+
+    Called in: playPvC()
+    Calls: minimax()
+    Returns: bestMove (the index, upon which if computer plays, the user will NOT win)
+    **************************************************************************************/
+    int findBestMove() {
+        int bestVal = -INT_MAX;
+        int bestMove = -1;
+
+        for (int i = 0; i < 9; i++) {
+            if (board[i] == EMPTY) {
+                board[i] = OPPONENT; // Computer's move
+                int moveVal = minimax(0, false);
+                board[i] = EMPTY;
+
+                if (moveVal > bestVal) {
+                    bestVal = moveVal;
+                    bestMove = i;
+                }
+            }
+        }
+        return bestMove;
+    }
+
+
+
+    /*******************************************************************************************************
+    If numberOfMovesOfPlayer <= numberOfMovesOfComputer, then return true meaning it is player's turn
+
+    Called in: playPvC()
+    Calls:
+    Returns: bool
+    *******************************************************************************************************/
+    bool isPlayerTurn() {
+        int playerMoves = 0, opponentMoves = 0;
+        for (int i = 0; i < 9; i++) {
+            if (board[i] == PLAYER) playerMoves++;
+            if (board[i] == OPPONENT) opponentMoves++;
+        }
+        return playerMoves <= opponentMoves;
+    }
+
+public:
+
+    /**************************************************************************************
+    Getter of private variable
+
+    Called in: object creation
+    Calls: displayGameMoves()
+    Returns: 2D Linked List Object
+    **************************************************************************************/
+    LL2D getGameMoves() {
+        return gamemoves;
+    }
+
+
+
+    /**************************************************************************************
+    Constructor
+
+    Called in: object creation
+    Calls: initializeWinningConditions(), resetBoard()
+    Returns:
+    **************************************************************************************/
+    TicTacToeGame() {
+        initializeWinningConditions();
+        resetBoard(); // Initialize the board in the resetBoard method
+    }
+
+
+
+    /*****************************************************************************************************************************
+    Prints results from stack ([*] Stack Implementation)
+
+    Called in: printGameResults() of class TicTacPro
+    Calls: stack.isEmpty(), stack.pop()
+    Returns:
+    *****************************************************************************************************************************/
+    void printResults() {
+        while (!gameResults.isEmpty()) {
+            auto result = gameResults.pop();
+            cout << "Game Mode: " << result.mode << ", Winner: " << result.winner << endl;
+        }
+    }
+
+
+
+    /*****************************************************************************************************************************
+    Player vs Computer. Player's move is user's move, computer's move is the 'best possible move' in response to that
+
+    Called in: handleStartGame() of class TicTacPro
+    Calls: gameOver(), resetBoard(), drawBoard(), playerMove(), isPlayerTurn(), announceResult(), checkWinner(), findBestMove()
+    Returns: Bool (True means function finished correctly and is over)
+    *****************************************************************************************************************************/
+    bool playPvC() {
+        LL* currentGameLL = new LL();
+        gamemoves.addToList(currentGameLL);
+
+        currentGameMode = "Player vs Computer";
+        resetBoard();
+
+        while (!gameOver()) {
+            drawBoard();
+            if (isPlayerTurn()) {
+                int move = playerMove(PLAYER);
+
+                currentGameLL->addMove(board, "Player", move);
+            }
+            else {
+                cout << "Computer's turn:\n";
+                int move = findBestMove();
+                board[move] = OPPONENT;
+                cout << "Computer placed at " << move + 1 << "\n";
+                currentGameLL->addMove(board, "Computer", move + 1);
+            }
+
+            if (gameOver()) {
+                drawBoard();
+                string winner = (checkWinner() == PLAYER) ? "Player" : "Computer";
+                announceResult();
+                break;
+            }
+        }
+
+        return true;  // Indicate the game was played
+    }
+
+
+
+    /*********************************************************************************************
+    Does Player vs Player Tic Tac Toe. Each player plays a move until one wins or tie
+
+    Called in: handleStartGame() of class TicTacPro
+    Calls: gameOver(), resetBoard(), drawBoard(), playerMove(), announceResult(), checkWinner()
+    Returns: Bool (True means function finished correctly and is over)
+    *********************************************************************************************/
+    bool playPvP() {
+
+        currentGameMode = "Player vs Player";
+        resetBoard();
+        int currentPlayer = PLAYER;
+
+        while (!gameOver()) {
+            drawBoard();
+            playerMove(currentPlayer);
+            currentPlayer = -currentPlayer; // Switch player
+            if (gameOver()) {
+                drawBoard();
+                string winner = (checkWinner() == PLAYER) ? "Computer 1" : "Computer 2";
+                announceResult();
+            }
+        }
+
+        return true;
+    }
+
+
+
+    /*************************************************************************************************************************************************************
+    Fills Two Queue with random values, then dequeue() to place 'X' or 'O' on those random blocks ([*] Queue Implementation)
+
+    Called in: run() of class TicTacPro
+    Calls: gameOver(), resetBoard(), drawBoard(), checkWinner(), QueueObject.isEmpty(), QueueObject.fillRandom(), QueueObject.dequeue()
+    Returns: Bool (No reason)
+    *************************************************************************************************************************************************************/
+    bool playCvC() {
+        currentGameMode = "Computer vs Computer";
+        resetBoard();
+        int turn = 0; // Track turns to alternate between players
+
+        while (!gameOver()) {
+            drawBoard();
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+
+            int currentPlayer = (turn % 2 == 0) ? PLAYER : OPPONENT;
+            Queue& currentQueue = (currentPlayer == PLAYER) ? computer1Moves : computer2Moves;
+
+            int move = -1;
+
+            // If the queue is empty, refill it
+            if (currentQueue.isEmpty()) {
+                currentQueue.fillRandom();
+            }
+
+            // Try to find a valid move from the queue
+            do {
+                move = currentQueue.dequeue() - 1; // Adjust for 0-indexed board
+                if (move < 0 || move >= 9) {
+                    // Invalid move, refill the queue and try again
+                    currentQueue.fillRandom();
+                    move = currentQueue.dequeue() - 1;
+                }
+            } while (board[move] != EMPTY);
+
+            // Make the move
+            board[move] = currentPlayer;
+            cout << "Computer " << (currentPlayer == PLAYER ? "1" : "2") << " plays at position " << move + 1 << "\n";
+
+            turn++; // Increment to switch players
+        }
+        if (gameOver()) {
+            drawBoard();
+            string winner = (checkWinner() == PLAYER) ? "Computer 1" : "Computer 2";
+
+            cout << "Winner: " << winner << endl;
+        }
+
+        system("pause");
+        system("cls");
+        return true;
+    }
+};
