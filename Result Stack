@@ -1,0 +1,64 @@
+
+
+/*-------------------------------------------------------------------------------------------------------------------
+The Stack class stores and displays the total instances of wins, loss, or ties across all game modes (except CvC)
+-------------------------------------------------------------------------------------------------------------------*/
+class ResultStack {
+private:
+    //element in a stack
+    struct Result {
+        string mode;
+        string winner;
+    };
+
+    Result stack[100];  // Assuming a maximum of 100 results
+
+    int top;
+
+public:
+    ResultStack() : top(-1) {}
+
+
+
+    /**************************************************************************************
+    Standard push function, if not full, add to stack.
+
+    Called in: object requirement
+    Calls:
+    Return:
+    **************************************************************************************/
+    void push(string mode, string winner) {
+        if (top < 99) {
+            stack[++top] = { mode, winner };
+        }
+    }
+
+
+
+    /**************************************************************************************
+    Standard check if empty, return true.
+
+    Called in: object requirement
+    Calls:
+    Return: bool
+    **************************************************************************************/
+    bool isEmpty() {
+        return top == -1;
+    }
+
+
+
+    /**************************************************************************************
+    Standard pop operation. If not empty, reduce top.
+
+    Called in: object requirement
+    Calls:
+    Return: stackState (or last element, if not empty)
+    **************************************************************************************/
+    Result pop() {
+        if (!isEmpty()) {
+            return stack[top--];
+        }
+        return { "", "" };  // Return an empty result if stack is empty
+    }
+};
