@@ -1,0 +1,34 @@
+
+/*-------------------------------------------------------------------------------------------------------------------
+The Stack class to store the moves made
+-------------------------------------------------------------------------------------------------------------------*/
+class MoveStack {
+private:
+    int stack[100]; // Array to store moves, assuming a maximum size of 100
+    int top; // Index for the top element
+
+public:
+    MoveStack() : top(-1) {}
+
+    void push(int move) {
+        if (top < 99) { // Check for stack overflow
+            stack[++top] = move;
+        }
+    }
+
+    int pop() {
+        if (top >= 0) {
+            return stack[top--];
+        }
+        return -1;
+    }
+
+    bool isEmpty() {
+        return top == -1;
+    }
+
+    void clear() {
+        top = -1;
+    }
+};
+

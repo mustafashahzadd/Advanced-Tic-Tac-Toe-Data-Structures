@@ -1,0 +1,200 @@
+class TicTacPro {
+private:
+    TicTacToeGame game;
+
+
+
+    /*************************************************************************************************************
+    Display's each 2D's Linked List's i-th Doubly Linked List ([*] 2D Doubly Linked List Implementation)
+
+    Called in: run()
+    Calls: 2DLL.getGameMoves(), 2DLL.getHead(), LL.displayAllMoves(), system()
+    Returns:
+    *************************************************************************************************************/
+    void displayGameMoves() {
+        LL2DNode* gameNode = game.getGameMoves().getHead();
+
+        int count = 1;
+
+        if (gameNode != nullptr) {
+            char c;
+            while (1) {
+                cout << "Game " << count << " Moves:\n";
+                gameNode->current->displayAllMoves();
+
+                cout << "Enter 'N' if you want to view next game's result\nEnter 'P' if you want to see previous game's result\nEnter 'E' if you want to not see any more games\n";
+                cout << "Enter choice: ";
+                cin >> c;
+
+                if (c == 'N') {
+                    if (gameNode->next == nullptr) {
+                        cout << "No next game in record!\n";
+                        system("pause");
+                        system("cls");
+                    }
+                    else {
+                        gameNode = gameNode->next;
+                        count++;
+                        system("cls");
+                    }
+                }
+                else if (c == 'P') {
+                    if (gameNode->prev == nullptr) {
+                        cout << "No previous game in record!\n";
+                        system("pause");
+                        system("cls");
+                    }
+                    else {
+                        gameNode = gameNode->prev;
+                        count--;
+                        system("cls");
+                    }
+                }
+                else if (c == 'E') {
+                    break;
+                }
+                else {
+                    cout << "Enter again, invalid input!\n";
+                    system("pause");
+                    system("cls");
+                }
+            }
+        }
+        else {
+            cout << "No moves stored yet. Please play and enjoy!\n";
+        }
+
+        return;
+    }
+
+
+
+    /*************************************************************************************************************
+    Display's Instructions of how the game is played
+
+    Called in: run()
+    Calls:
+    Returns:
+    *************************************************************************************************************/
+    void displayInstructions() {
+        cout << "Instructions for Tic Tac Toe:\n";
+        cout << "- The game is played on a 3x3 grid.\n";
+        cout << "- Players take turns to mark a space in the grid.\n";
+        cout << "- The first player to align three of their marks ('X' or 'O') vertically, horizontally, or diagonally wins.\n";
+        cout << "- If all spaces are marked and no player has won, the game is a draw.\n\n";
+    }
+
+
+
+    /**************************************************************************************
+    Displays 'Start' Menu ([*] keeps recalling itself if a 'wrong' input is detected)
+
+    Called in: run()
+    Calls: game.playPvP(), game.playPvC()
+    **************************************************************************************/
+    void handleStartGame() {
+        int choice;
+        do {
+            cout << "Start Game Menu:\n";
+            cout << "1) Player vs Player\n";
+            cout << "2) Player vs Computer\n";
+            cout << "3) Back\n";
+            cout << "Enter your choice: ";
+            cin >> choice;
+
+            switch (choice) {
+            case 1:
+                system("cls");
+                game.playPvP();
+                system("pause");
+                system("cls");
+                break;
+            case 2:
+                system("cls");
+                game.playPvC();
+                system("pause");
+                system("cls");
+                break;
+            case 3:
+                system("cls");
+                return;
+            default:
+                cout << "Invalid choice. Please try again.\n";
+                system("pause");
+                system("cls");
+            }
+        } while (choice != 3);
+    }
+
+public:
+    // Constructor
+    TicTacPro() {}
+
+
+
+    /**************************************************************************************
+    Displays 'Main' Menu ([*] keeps recalling itself if a 'wrong' input is detected)
+
+    Called in: main()
+    Calls: TicTacToeGameObject.printResults()
+    Returns:
+    **************************************************************************************/
+    void printGameResults() {
+        cout << "Printing the results of the game that you played in order of latest played to last played:\n";
+        game.printResults();
+    }
+
+
+
+    /**************************************************************************************
+    Displays 'Main' Menu ([*] keeps recalling itself if a 'wrong' input is detected)
+
+    Called in: main()
+    Calls: handleStartGame(), game.playCvC(), displayInstructions(), displayGameMoves()
+    **************************************************************************************/
+    void run() {
+        int choice;
+        do {
+            cout << "Main Menu\n";
+            cout << "1) Start Game\n";
+            cout << "2) Tutorial\n";
+            cout << "3) Instructions\n";
+            cout << "4) All The Moves That Were Played Per Gaming Session\n";
+            cout << "5) Exit\n";
+            cout << "Enter your choice: ";
+            cin >> choice;
+
+            system("cls");
+
+            switch (choice) {
+            case 1:
+                // Handles starting a new game, new menue
+                handleStartGame();
+                break;
+            case 2:
+                // Tutorial
+                game.playCvC();
+                break;
+            case 3:
+                // Displays the game instructions
+                displayInstructions();
+                break;
+            case 4:
+                //display all previous moves for PvC
+                displayGameMoves();
+                system("pause");
+                system("cls");
+                break;
+            case 5:
+                //exit condition
+                break;
+            default:
+                cout << "Invalid choice. Please try again.\n";
+                system("pause");
+                system("cls");
+                break;
+            }
+        } while (choice != 5);
+    }
+
+};
