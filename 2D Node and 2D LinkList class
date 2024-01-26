@@ -1,0 +1,69 @@
+/*-----------------------------------------------------------------------------------------------------------
+The Node class for 2D linked list
+-----------------------------------------------------------------------------------------------------------*/
+class LL2DNode {
+public:
+    LL* current;
+    LL2DNode* next;
+    LL2DNode* prev;
+
+    LL2DNode() {
+        next = nullptr;
+        prev = nullptr;
+        current = nullptr;
+    }
+};
+
+
+/*-----------------------------------------------------------------------------------------------------------
+The Class that will have the 2D linked list to store the whole session's moves
+-----------------------------------------------------------------------------------------------------------*/
+class LL2D {
+private:
+    LL2DNode* head;
+
+public:
+    LL2D() {
+        head = nullptr;
+    }
+
+
+
+    /**************************************************************************************
+    Add a new Linked List to the 2D linked List
+
+    Called in: playPvC()
+    Calls:
+    Return:
+    **************************************************************************************/
+    void addToList(LL* newList) {
+        if (head == nullptr) {
+            head = new LL2DNode();
+            head->current = newList;
+            return;
+        }
+
+        LL2DNode* ptr = head;
+        while (ptr->next != nullptr) {
+            ptr = ptr->next;
+        }
+
+        LL2DNode* newNode = new LL2DNode();
+        newNode->current = newList;
+        ptr->next = newNode;
+        newNode->prev = ptr;
+    }
+
+
+
+    /**************************************************************************************
+    Getter for private variable LL2DNode pointer
+
+    Called in:
+    Calls:
+    Return: LL2DNode pointer
+    **************************************************************************************/
+    LL2DNode* getHead() {
+        return head;
+    }
+};
